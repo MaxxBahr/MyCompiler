@@ -29,6 +29,7 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
         if parse::<i32>(word).unwrap() {
             result.insert(result.length(), Token::new(word, Tokens::number));
         }
+        // Map variable, operator, braces, parantheses, identifier
     }
 }
 
