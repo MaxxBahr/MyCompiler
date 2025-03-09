@@ -4,6 +4,8 @@ pub enum Tokens {
     equals,
     openParen,
     closeParen,
+    openBrace,
+    closeBrace,
     binaryOperator,
     variable,
 }
@@ -13,10 +15,21 @@ pub struct Token {
     token: Tokens,
 }
 
+impl Token {
+    pub fn new(value: String, token: String) -> Token {
+        Token { value, token }
+    }
+}
+
 pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
     let sepCode: Vec<&str> = splitString(code);
+    let mut result: HashMap<i32, Token>;
 
-    while !sepCode.is_empty() {}
+    for word in sepCode {
+        if parse::<i32>(word).unwrap() {
+            result.insert(result.length(), Token::new(word, Tokens::number));
+        }
+    }
 }
 
 fn splitString(code: &str) -> Vec<&str> {
