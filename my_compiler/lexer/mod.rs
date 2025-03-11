@@ -26,8 +26,8 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
     let mut result: HashMap<i32, Token>;
 
     for word in sepCode {
-        if parse::<i32>(word).unwrap() {
-            result.insert(result.length(), Token::new(word, Tokens::number));
+        if let Ok(number) = word.parse::<i32>() {
+            result.insert(result.len(), Token::new(number, Tokens::number));
         }
         // Map variable, operator, braces, parantheses, identifier
     }
