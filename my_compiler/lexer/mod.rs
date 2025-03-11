@@ -1,13 +1,14 @@
+use std::collections::HashMap;
 pub enum Tokens {
-    number,
-    identifier,
-    equals,
-    openParen,
-    closeParen,
-    openBrace,
-    closeBrace,
-    binaryOperator,
-    variable,
+    Number,
+    Identifier,
+    Equals,
+    OpenParen,
+    CloseParen,
+    OpenBrace,
+    CloseBrace,
+    BinaryOperator,
+    Variable,
 }
 
 pub struct Token {
@@ -22,18 +23,18 @@ impl Token {
 }
 
 pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
-    let sepCode: Vec<&str> = splitString(code);
+    let sep_code: Vec<&str> = split_string(code);
     let mut result: HashMap<i32, Token>;
 
-    for word in sepCode {
+    for word in sep_code {
         if let Ok(number) = word.parse::<i32>() {
-            result.insert(result.len(), Token::new(number, Tokens::number));
+            result.insert(result.len(), Token::new(number, Tokens::Number));
         }
-        // Map variable, operator, braces, parantheses, identifier
+        // Map Variable, operator, braces, parantheses, Identifier
     }
 }
 
-fn splitString(code: &str) -> Vec<&str> {
-    let sepCode: Vec<&str> = code.trim().split(' ').collect();
-    sepCode
+fn split_string(code: &str) -> Vec<&str> {
+    let sep_code: Vec<&str> = code.trim().split(' ').collect();
+    sep_code
 }
