@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use rusqlite::{Connection};
 pub enum Tokens {
     Number,
@@ -12,8 +12,15 @@ pub enum Tokens {
     VariableName,
     Variable,
     ReturnValue,
+    Operator(Operators),
 }
 
+enum Operators {
+    Add,
+    Subtract,
+    Multiply,
+    Divide
+}
 fn tokenize_keyword(token: &str) -> Option<Tokens>{
     match token {
         "Variable" => Some(Tokens::Variable),
@@ -44,25 +51,29 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
     let sep_code: Vec<&str> = split_string(code);
     let mut result: HashMap<i32, Token> = HashMap::new();
 
-    for word in sep_code {
-        if let Ok(number) = word.parse::<i32>() {
-            result.insert(result.len(), Token::new(word, Tokens::Number));
-        }
-        if word == "("{
-            result.insert(result.len(), Token::new(word, Tokens::OpenParen));
-        }
-        if word == ")"{
-            result.insert(result.len(), Token::new(word, Tokens::CloseParen));
-        }
-        if word == "{"{
-            result.insert(result.len(), Token::new(word, Tokens::OpenBrace));
-        }
-        if word == "}"{
-            result.insert(result.len(), Token::new(word, Tokens::CloseBrace));
-        }
-        // If there is a keyword like let we have to store the VariableNames name
+    // Add more keywords, also to the database
+    let keywords: HashSet<&str> = ["let", "int", "float", "long", "double"].iter().cloned().collect();
 
-        // Map VariableName, operator, braces, parantheses, Identifier
+    for word in sep_code {
+        let token = if keywords.contains(word){
+            is_keyword(word).unwrap_or(Tokens::Identifier)
+        } else if let Ok(_) = word.parse::<i32>(){
+            Tokens::Number
+        } else {
+            match word {
+                // Fix this bc there are no whitespaces between parantheses
+                "(" => Tokens::OpenParen,
+                ")" => Tokens::CloseParen,
+                "{" => Tokens::OpenBrace,
+                "}" => Tokens::CloseBrace,
+                "+" => Tokens::Operator(Operators::Add),
+                "-" => Tokens::Operator(Operators::Subtract),
+                "*" => Tokens::Operator(Operators::Multiply),
+                "/" => Tokens::Operator(Operators::Divide),
+                _ => Tokens::Identifier
+            }
+        };
+        // Map operator
     }
     result
 }
