@@ -30,6 +30,19 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
         if let Ok(number) = word.parse::<i32>() {
             result.insert(result.len(), Token::new(number, Tokens::Number));
         }
+        if word == "("{
+            result.insert(result.len(), Token::new(word, Tokens::OpenParen));
+        }
+        if word == ")"{
+            result.insert(result.len(), Token::new(word, Tokens::CloseParen));
+        }
+        if word == "{"{
+            result.insert(result.len(), Token::new(word, Tokens::OpenBrace));
+        }
+        if word == "}"{
+            result.insert(result.len(), Token::new(word, Tokens::CloseBrace));
+        }
+        // If there is a keyword like let we have to store the variables name
         // Map Variable, operator, braces, parantheses, Identifier
     }
 }
