@@ -32,12 +32,12 @@ fn tokenize_keyword(token: &str) -> Option<Tokens>{
 fn is_keyword(word: &str) -> Result<Tokens, rusqlite::Error> {
     let conn = Connection::open("keywords.db")?;
     let mut stmt = conn.prepare("SELECT token FROM words WHERE keyword =?1")?;
-    let token = stmt.query_row([word], |row| row.get(0))?;
-    tokenize_keyword(token).ok_or_else(|| rusqlite::Error::InvalidQuery)
+    let token: String = stmt.query_row([word], |row| row.get(0))?;
+    tokenize_keyword(&token).ok_or_else(|| rusqlite::Error::InvalidQuery)
 }
 
 pub struct Token {
-    value: &'static str,
+    value: &str,
     token: Tokens,
 }
 
