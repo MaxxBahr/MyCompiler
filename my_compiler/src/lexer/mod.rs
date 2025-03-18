@@ -61,21 +61,24 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
                 is_keyword(word).unwrap_or(Tokens::Identifier)
             } else if let Ok(_) = word.parse::<i32>(){
                 Tokens::Number
+            }else{
+                Tokens::Identifier
             };
             result.insert(result.len() as i32, Token::new(word, token));
         } else {
             for char in word.chars(){
-                match word {
-                    "(" => result.insert(result.len() as i32, Token::new(char as &str, Tokens::OpenParen)),
-                    ")" => result.insert(result.len() as i32, Token::new(char as &str, Tokens::CloseParen)),
-                    "{" => Tokens::OpenBrace,
-                    "}" => Tokens::CloseBrace,
-                    "+" => Tokens::Operator(Operators::Add),
-                    "-" => Tokens::Operator(Operators::Subtract),
-                    "*" => Tokens::Operator(Operators::Multiply),
-                    "/" => Tokens::Operator(Operators::Divide),
+                let token = match char {
+                    '(' => Tokens::OpenParen,
+                    ')' => Tokens::CloseParen,
+                    '{' => Tokens::OpenBrace,
+                    '}' => Tokens::CloseBrace,
+                    '+' => Tokens::Operator(Operators::Add),
+                    '-' => Tokens::Operator(Operators::Subtract),
+                    '*' => Tokens::Operator(Operators::Multiply),
+                    '/' => Tokens::Operator(Operators::Divide),
                     _ => Tokens::Identifier
-                }
+                };
+                result.insert(result.len() as i32, Token::new(&char.to_string(), token));
             }
         }
     }
