@@ -31,18 +31,18 @@ fn tokenize_keyword(token: &str) -> Option<Tokens>{
 
 fn is_keyword(word: &str) -> Result<Tokens, rusqlite::Error> {
     let conn = Connection::open("keywords.db")?;
-    let mut stmt = conn.prepare("SELECT token FROM words WHERE word =?1")?;
+    let mut stmt = conn.prepare("SELECT token FROM words WHERE keyword =?1")?;
     let token = stmt.query_row([word], |row| row.get(0))?;
     tokenize_keyword(token).ok_or_else(|| rusqlite::Error::InvalidQuery)
 }
 
 pub struct Token {
-    value: String,
+    value: &'static str,
     token: Tokens,
 }
 
 impl Token {
-    pub fn new(value: String, token: Tokens) -> Token {
+    pub fn new(value: &str, token: Tokens) -> Token {
         Token { value, token }
     }
 }
@@ -62,11 +62,12 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
             } else if let Ok(_) = word.parse::<i32>(){
                 Tokens::Number
             };
+            result.insert(result.len() as i32, Token::new(word, token));
         } else {
             for char in word.chars(){
                 match word {
-                    "(" => Tokens::OpenParen,
-                    ")" => Tokens::CloseParen,
+                    "(" => result.insert(result.len() as i32, Token::new(char as &str, Tokens::OpenParen)),
+                    ")" => result.insert(result.len() as i32, Token::new(char as &str, Tokens::CloseParen)),
                     "{" => Tokens::OpenBrace,
                     "}" => Tokens::CloseBrace,
                     "+" => Tokens::Operator(Operators::Add),
@@ -78,7 +79,6 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
             }
         }
     }
-
     result
 }
 
