@@ -55,26 +55,30 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
     let keywords: HashSet<&str> = ["let", "int", "float", "long", "double"].iter().cloned().collect();
 
     for word in sep_code {
-        let token = if keywords.contains(word){
-            is_keyword(word).unwrap_or(Tokens::Identifier)
-        } else if let Ok(_) = word.parse::<i32>(){
-            Tokens::Number
+        // check if its only letters without signs
+        if word.chars().all(|c| {c.is_ascii_alphanumeric()}){
+            let token = if keywords.contains(word){
+                is_keyword(word).unwrap_or(Tokens::Identifier)
+            } else if let Ok(_) = word.parse::<i32>(){
+                Tokens::Number
+            };
         } else {
-            match word {
-                // Fix this bc there are no whitespaces between parantheses
-                "(" => Tokens::OpenParen,
-                ")" => Tokens::CloseParen,
-                "{" => Tokens::OpenBrace,
-                "}" => Tokens::CloseBrace,
-                "+" => Tokens::Operator(Operators::Add),
-                "-" => Tokens::Operator(Operators::Subtract),
-                "*" => Tokens::Operator(Operators::Multiply),
-                "/" => Tokens::Operator(Operators::Divide),
-                _ => Tokens::Identifier
+            for char in word.chars(){
+                match word {
+                    "(" => Tokens::OpenParen,
+                    ")" => Tokens::CloseParen,
+                    "{" => Tokens::OpenBrace,
+                    "}" => Tokens::CloseBrace,
+                    "+" => Tokens::Operator(Operators::Add),
+                    "-" => Tokens::Operator(Operators::Subtract),
+                    "*" => Tokens::Operator(Operators::Multiply),
+                    "/" => Tokens::Operator(Operators::Divide),
+                    _ => Tokens::Identifier
+                }
             }
-        };
-        // Map operator
+        }
     }
+
     result
 }
 
