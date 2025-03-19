@@ -13,6 +13,8 @@ pub enum Tokens {
     VariableName,
     Variable,
     ReturnValue,
+    VariableType,
+    FunctionName,
     Operator(Operators),
 }
 #[derive(Debug)]
@@ -54,14 +56,29 @@ pub fn tokenizer(code: String) -> HashMap<i32, Token> {
     let mut result: HashMap<i32, Token> = HashMap::new();
 
     // Add more keywords, also to the database
-    let keywords: HashSet<&str> = ["let", "int", "float", "long", "double"].iter().cloned().collect();
+    let keywords: HashSet<&str> = ["int", "float", "long", "double"].iter().cloned().collect();
+    let function_parens: HashSet<&str> = ["(",")"].iter().cloned().collect();
+    let mut iter = sep_code.into_iter().peekable();
 
-    for word in sep_code {
+    while let Some(word) = iter.next() {
         // check if its only letters without signs
         if word.chars().all(|c| {c.is_ascii_alphanumeric()}){
             let token = if keywords.contains(&*word){
-                // Add that the word after this one is variables name
-                is_keyword(word.clone()).unwrap_or(Tokens::Identifier)
+                // Mutable and immutable borrow is not possible
+                if let (Some(next),Some(second_next)) = (iter.peek(), iter.clone().nth(1)){
+                    if next == "(){" {
+                        result.insert(result.len() as i32, Token::new(word.clone(), Tokens::FunctionName));
+                        continue;
+                    }
+                    if second_next == "(){"{
+                        Tokens::ReturnValue
+                    }else if second_next == "="{
+                        Tokens::VariableType
+                    }else {
+                        Tokens::Identifier
+                    }
+                }else{Tokens::Identifier}
+                //is_keyword(word.clone()).unwrap_or(Tokens::Identifier)
             } else if let Ok(_) = word.parse::<i32>(){
                 Tokens::Number
             }else{
