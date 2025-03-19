@@ -1,5 +1,5 @@
 mod lexer;
 
 fn main() {
-    lexer::tokenizer("int main(){let hello = 3}");
+    println!("{:?}",lexer::tokenizer("int main (){ let hello = 3 }".to_string()));
 }

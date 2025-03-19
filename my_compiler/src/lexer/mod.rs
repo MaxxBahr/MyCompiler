@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use rusqlite::{Connection};
+#[derive(Debug)]
 pub enum Tokens {
     Number,
     Identifier,
@@ -14,7 +15,7 @@ pub enum Tokens {
     ReturnValue,
     Operator(Operators),
 }
-
+#[derive(Debug)]
 enum Operators {
     Add,
     Subtract,
@@ -29,26 +30,27 @@ fn tokenize_keyword(token: &str) -> Option<Tokens>{
     }
 }
 
-fn is_keyword(word: &str) -> Result<Tokens, rusqlite::Error> {
+fn is_keyword(word: String) -> Result<Tokens, rusqlite::Error> {
     let conn = Connection::open("keywords.db")?;
     let mut stmt = conn.prepare("SELECT token FROM words WHERE keyword =?1")?;
     let token: String = stmt.query_row([word], |row| row.get(0))?;
     tokenize_keyword(&token).ok_or_else(|| rusqlite::Error::InvalidQuery)
 }
-
+#[derive(Debug)]
 pub struct Token {
-    value: &str,
+    value: String,
     token: Tokens,
 }
 
 impl Token {
-    pub fn new(value: &str, token: Tokens) -> Token {
+    pub fn new(value: String, token: Tokens) -> Token {
         Token { value, token }
     }
 }
 
-pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
-    let sep_code: Vec<&str> = split_string(code);
+
+pub fn tokenizer(code: String) -> HashMap<i32, Token> {
+    let sep_code: Vec<String> = split_string(code);
     let mut result: HashMap<i32, Token> = HashMap::new();
 
     // Add more keywords, also to the database
@@ -57,8 +59,9 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
     for word in sep_code {
         // check if its only letters without signs
         if word.chars().all(|c| {c.is_ascii_alphanumeric()}){
-            let token = if keywords.contains(word){
-                is_keyword(word).unwrap_or(Tokens::Identifier)
+            let token = if keywords.contains(&*word){
+                // Add that the word after this one is variables name
+                is_keyword(word.clone()).unwrap_or(Tokens::Identifier)
             } else if let Ok(_) = word.parse::<i32>(){
                 Tokens::Number
             }else{
@@ -72,20 +75,21 @@ pub fn tokenizer(code: &str) -> HashMap<i32, Token> {
                     ')' => Tokens::CloseParen,
                     '{' => Tokens::OpenBrace,
                     '}' => Tokens::CloseBrace,
+                    '=' => Tokens::Equals,
                     '+' => Tokens::Operator(Operators::Add),
                     '-' => Tokens::Operator(Operators::Subtract),
                     '*' => Tokens::Operator(Operators::Multiply),
                     '/' => Tokens::Operator(Operators::Divide),
                     _ => Tokens::Identifier
                 };
-                result.insert(result.len() as i32, Token::new(&char.to_string(), token));
+                result.insert(result.len() as i32, Token::new(char.to_string(), token));
             }
         }
     }
     result
 }
 
-fn split_string(code: &str) -> Vec<&str> {
-    let sep_code: Vec<&str> = code.trim().split_whitespace().collect();
+fn split_string(code: String) -> Vec<String> {
+    let sep_code: Vec<String> = code.trim().split_whitespace().map(|s| s.to_string()).collect();
     sep_code
 }
